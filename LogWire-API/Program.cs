@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 namespace LogWire.API
@@ -14,7 +15,14 @@ namespace LogWire.API
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+
+                    webBuilder.ConfigureAppConfiguration(config =>
+                    {
+                        config.AddEnvironmentVariables("lw_");
+                    });
+
                     webBuilder.UseStartup<Startup>();
+
                 });
     }
 }
