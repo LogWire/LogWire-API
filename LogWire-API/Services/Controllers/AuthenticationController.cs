@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LogWire.API.Data.Model;
+using LogWire.API.Data.Repository;
 using LogWire.API.Utils;
 using LogWire.Controller.Client;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +16,12 @@ namespace LogWire.API.Controllers
     {
 
         private IConfiguration _configuration;
+        private IDataRepository<RefreshTokenEntry> _refreshTokenRepo;
 
-        public AuthenticationController(IConfiguration config)
+        public AuthenticationController(IConfiguration config, IDataRepository<RefreshTokenEntry> refreshTokenRepo)
         {
             _configuration = config;
+            _refreshTokenRepo = refreshTokenRepo;
         }
 
         [HttpPost]
@@ -32,7 +36,19 @@ namespace LogWire.API.Controllers
 
                 if (!String.IsNullOrWhiteSpace(value))
                 {
-                    return Ok(new { UserId = value });
+
+                    var refreshToken = TokenUtils.GenerateRefreshToken();
+                    
+                    _refreshTokenRepo.Add(new RefreshTokenEntry
+                    {
+                        Token = refreshToken,
+                        CreatedAt = DateTime.UtcNow,
+                        UserId = Guid.Parse(value)
+                    });
+
+                    var accessToken = TokenUtils.GenerateJwtToken(value);
+
+                    return Ok(new { UserId = value, RefreshToken = refreshToken, AccessToken = accessToken });
                 }
 
                 return BadRequest(new { Message = "Error with username or password." });
