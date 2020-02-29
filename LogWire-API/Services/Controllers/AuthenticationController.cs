@@ -6,6 +6,7 @@ using LogWire.API.Data.Model;
 using LogWire.API.Data.Repository;
 using LogWire.API.Utils;
 using LogWire.Controller.Client;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -47,8 +48,13 @@ namespace LogWire.API.Controllers
                     });
 
                     var accessToken = TokenUtils.GenerateJwtToken(value);
+                    HttpContext.Response.Cookies.Append("refresh_token", refreshToken,new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true
+                    });
 
-                    return Ok(new { UserId = value, RefreshToken = refreshToken, AccessToken = accessToken });
+                    return Ok(new { AccessToken = accessToken, TokenExpires= 900000 });
                 }
 
                 return BadRequest(new { Message = "Error with username or password." });
@@ -56,6 +62,53 @@ namespace LogWire.API.Controllers
             }
 
             return BadRequest(new { Message = "Missing headers" });
+
+        }
+
+        [HttpPost]
+        [Route("/auth/refresh")]
+        public async Task<ActionResult> Refresh()
+        {
+
+            var s = HttpContext.Request.Cookies["refresh_token"];
+
+            if (s != null)
+            {
+
+                var tokenData = _refreshTokenRepo.Get(s);
+
+                if (tokenData != null)
+                {
+
+                    var refreshToken = TokenUtils.GenerateRefreshToken();
+
+                    _refreshTokenRepo.Add(new RefreshTokenEntry
+                    {
+                        Token = refreshToken,
+                        CreatedAt = DateTime.UtcNow,
+                        UserId = tokenData.UserId
+                    });
+
+                    _refreshTokenRepo.Delete(tokenData);
+
+                    var accessToken = TokenUtils.GenerateJwtToken(tokenData.UserId.ToString());
+                    HttpContext.Response.Cookies.Delete("refresh_token");
+
+                    HttpContext.Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true
+                    });
+
+                    return Ok(new { AccessToken = accessToken, TokenExpires = 900000 });
+
+                }
+
+                return Unauthorized(new { Message = "Invalid Token" });
+
+            }
+
+            return BadRequest(new { Message = "Missing inforation" });
 
         }
 
