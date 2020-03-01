@@ -22,6 +22,8 @@ namespace LogWire.API
     {
 
         public static string JwtKey = null;
+        public static string EncryptionKey = null;
+
 
         public Startup(IConfiguration configuration)
         {
@@ -38,6 +40,13 @@ namespace LogWire.API
             {
                 JwtKey = Guid.NewGuid().ToString();
                 Configuration["api.jwt.key"] = JwtKey;
+            }
+
+            EncryptionKey = Configuration["api.access.key"];
+            if (EncryptionKey == null)
+            {
+                EncryptionKey = Guid.NewGuid().ToString() + "-" + Guid.NewGuid().ToString() + "-" + Guid.NewGuid().ToString();
+                Configuration["api.access.key"] = EncryptionKey;
             }
 
             var key = Encoding.ASCII.GetBytes(JwtKey);
@@ -69,8 +78,8 @@ namespace LogWire.API
             var corsBuilder = new CorsPolicyBuilder();
             corsBuilder.AllowAnyHeader();
             corsBuilder.AllowAnyMethod();
-            corsBuilder.AllowAnyOrigin(); // For anyone access.
-            //corsBuilder.WithOrigins("http://localhost:56573"); // for a specific url. Don't add a forward slash on the end!
+            corsBuilder.AllowCredentials();
+            corsBuilder.WithOrigins("http://localhost:4100"); // for a specific url. Don't add a forward slash on the end!
 
             services.AddCors(options =>
             {
@@ -101,7 +110,8 @@ namespace LogWire.API
             app.UseCors(builder =>
             {
                 builder.AllowAnyHeader();
-                builder.AllowAnyOrigin();
+                builder.AllowCredentials();
+                builder.WithOrigins(new[] {"http://localhost:4100"});
             });
 
             app.UseSwagger();

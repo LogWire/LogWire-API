@@ -48,7 +48,7 @@ namespace LogWire.API.Controllers
                     });
 
                     var accessToken = TokenUtils.GenerateJwtToken(value);
-                    HttpContext.Response.Cookies.Append("refresh_token", refreshToken,new CookieOptions
+                    HttpContext.Response.Cookies.Append("rt", EncryptionUtil.Encrypt(refreshToken, Startup.EncryptionKey),new CookieOptions
                     {
                         HttpOnly = true,
                         Secure = true
@@ -70,10 +70,11 @@ namespace LogWire.API.Controllers
         public async Task<ActionResult> Refresh()
         {
 
-            var s = HttpContext.Request.Cookies["refresh_token"];
+            var s = HttpContext.Request.Cookies["rt"];
 
-            if (s != null)
+            if (!String.IsNullOrWhiteSpace(s))
             {
+                s = EncryptionUtil.Decrypt(s, Startup.EncryptionKey);
 
                 var tokenData = _refreshTokenRepo.Get(s);
 
@@ -92,9 +93,9 @@ namespace LogWire.API.Controllers
                     _refreshTokenRepo.Delete(tokenData);
 
                     var accessToken = TokenUtils.GenerateJwtToken(tokenData.UserId.ToString());
-                    HttpContext.Response.Cookies.Delete("refresh_token");
+                    HttpContext.Response.Cookies.Delete("rt");
 
-                    HttpContext.Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+                    HttpContext.Response.Cookies.Append("rt", EncryptionUtil.Encrypt(refreshToken, Startup.EncryptionKey), new CookieOptions
                     {
                         HttpOnly = true,
                         Secure = true
