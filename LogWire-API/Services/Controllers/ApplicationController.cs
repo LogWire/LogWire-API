@@ -45,6 +45,8 @@ namespace LogWire.API.Services.Controllers
             var value = await ApplicationApiClient.ListApplications(_configuration["controller_endpoint"],
                 _configuration["access_token"]);
 
+            value.Sort(((entry, listEntry) => String.Compare(entry.Name, listEntry.Name, StringComparison.Ordinal)));
+
             return Ok(new { Applications = value });
         }
     }

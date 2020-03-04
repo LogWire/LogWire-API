@@ -110,6 +110,7 @@ namespace LogWire.API
             app.UseCors(builder =>
             {
                 builder.AllowAnyHeader();
+                builder.AllowAnyMethod();
                 builder.AllowCredentials();
                 builder.WithOrigins(new[] {"http://localhost:4100"});
             });
