@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using LogWire.API.Data.Model;
 using LogWire.API.Data.Repository;
 using LogWire.API.Utils;
 using LogWire.Controller.Client;
+using LogWire.Controller.Client.Clients;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-namespace LogWire.API.Controllers
+namespace LogWire.API.Services.Controllers
 {
     [ApiController]
     public class AuthenticationController : ControllerBase
