@@ -22,6 +22,9 @@
     <Reference Include="LogWire-Controller.Client">
       <HintPath>..\Librarys\LogWire-Controller.Client.dll</HintPath>
     </Reference>
+    <Reference Include="LogWire-SIEM-Service.Client">
+      <HintPath>..\Librarys\LogWire-SIEM-Service.Client.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 

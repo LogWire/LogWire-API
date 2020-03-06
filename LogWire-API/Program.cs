@@ -25,7 +25,8 @@ namespace LogWire.API
                     {
                         config.AddEnvironmentVariables("lw_");
                             config.AddControllerConfiguration(endpoint,"api", token);
-                        });
+                            config.AddControllerConfiguration(endpoint, "services", token);
+                    });
 
                     webBuilder.UseStartup<Startup>();
 
