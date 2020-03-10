@@ -28,6 +28,8 @@ namespace LogWire.API
                             config.AddControllerConfiguration(endpoint, "services", token);
                     });
 
+                    webBuilder.UseUrls("https://0.0.0.0:5003");
+
                     webBuilder.UseStartup<Startup>();
 
                 });
